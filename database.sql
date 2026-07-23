@@ -9,6 +9,8 @@ CREATE TABLE petugas (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+INSERT INTO petugas (nama, email, password) VALUES ('Admin', 'admin@gmail.com', '$2y$10$iNJ3quoTyE9klbOQB.XSu.OIkNo7YHoad0bCpi8MzXNN/FE0NQW4i');
+
 CREATE TABLE data_anak (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nama VARCHAR(100) NOT NULL,
