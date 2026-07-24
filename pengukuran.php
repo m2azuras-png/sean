@@ -99,28 +99,31 @@ $daftar_anak = $koneksi->query('SELECT id, nama, nis FROM data_anak ORDER BY nam
 const fields = ['berat_badan', 'tinggi_badan', 'lingkar_perut'];
 
 function ambilBacaanAlat() {
-    fetch('baca_sensor.php')
+    fetch('baca_sensor.php?_t=' + Date.now(), { cache: 'no-store' })
         .then(r => r.json())
         .then(data => {
             fields.forEach(f => {
                 const el = document.getElementById(f);
-                if (document.activeElement !== el) {
+                if (el && document.activeElement !== el) {
                     el.value = data[f];
                 }
             });
             const status = document.getElementById('status-alat');
-            const detik = Math.round((Date.now() - new Date(data.updated_at.replace(' ', 'T'))) / 1000);
-            status.textContent = detik < 10
-                ? 'Alat terhubung, data diperbarui otomatis.'
-                : 'Belum ada data terbaru dari alat (terakhir ' + detik + ' detik lalu).';
+            const detik = data.detik_lalu !== undefined ? data.detik_lalu : 9999;
+            
+            if (detik <= 15) {
+                status.innerHTML = '<span style="color:#10b981; font-weight:600;">● Alat Terhubung (Real-time)</span> — Data diperbarui dari ESP32 (terakhir ' + detik + ' dtk lalu)';
+            } else {
+                status.innerHTML = '<span style="color:#f59e0b; font-weight:600;">○ Alat Siaga</span> — Menunggu data dikirim dari tombol ESP32...';
+            }
         })
         .catch(() => {
-            document.getElementById('status-alat').textContent = 'Gagal mengambil data dari alat.';
+            document.getElementById('status-alat').innerHTML = '<span style="color:#ef4444;">✕ Gagal terhubung ke server.</span>';
         });
 }
 
 ambilBacaanAlat();
-setInterval(ambilBacaanAlat, 2000);
+setInterval(ambilBacaanAlat, 1000);
 </script>
 </body>
 </html>
