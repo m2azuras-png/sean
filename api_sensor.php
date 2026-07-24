@@ -29,8 +29,16 @@ if ($berat === null || $tinggi === null || $lingkar === null) {
     exit;
 }
 
-$stmt = $koneksi->prepare('UPDATE bacaan_sensor SET berat_badan=?, tinggi_badan=?, lingkar_perut=? WHERE id=1');
+$stmt = $koneksi->prepare('INSERT INTO bacaan_sensor (id, berat_badan, tinggi_badan, lingkar_perut) VALUES (1, ?, ?, ?) ON DUPLICATE KEY UPDATE berat_badan=VALUES(berat_badan), tinggi_badan=VALUES(tinggi_badan), lingkar_perut=VALUES(lingkar_perut)');
 $stmt->bind_param('ddd', $berat, $tinggi, $lingkar);
 $stmt->execute();
 
-echo json_encode(['status' => 'ok']);
+echo json_encode([
+    'status' => 'ok',
+    'pesan' => 'Data sensor berhasil tersimpan.',
+    'data' => [
+        'berat_badan' => (float)$berat,
+        'tinggi_badan' => (float)$tinggi,
+        'lingkar_perut' => (float)$lingkar
+    ]
+]);
