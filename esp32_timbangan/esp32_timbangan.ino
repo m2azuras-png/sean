@@ -164,6 +164,9 @@ void kirimDataKeServer() {
   payload += "\"lingkar_perut\":" + String(keliling_cm, 1);
   payload += "}";
 
+  Serial.print("Payload dikirim ke server: ");
+  Serial.println(payload);
+
   int kodeRespon = http.POST(payload);
 
   if (kodeRespon > 0) {
@@ -212,6 +215,12 @@ void aksiMulaiUkurPerut() {
 
 void aksiKirimData() {
   Serial.println(">>> KIRIM DATA KE WEB <<<");
+
+  // Pastikan membaca nilai tinggi & berat paling baru secara instant sebelum dikirim
+  jarakSensor = bacaTinggi();
+  tinggi_cm = TINGGI_SENSOR_DARI_LANTAI - jarakSensor;
+  if (tinggi_cm < 0) tinggi_cm = 0;
+
   kirimDataKeServer();
   
   myDFPlayer.playMp3Folder(4);
