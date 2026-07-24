@@ -12,7 +12,7 @@ if ($koneksi->connect_error) {
 }
 $koneksi->set_charset('utf8mb4');
 
-define('ESP32_API_KEY', 'ubah-kunci-ini');
+define('ESP32_API_KEY', 'Tmbgn-Pertamina-XYZ998');
 
 function hitung_usia($tanggal_lahir) {
     $lahir = new DateTime($tanggal_lahir);
