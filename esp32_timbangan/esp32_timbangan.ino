@@ -140,7 +140,7 @@ void tampilkanLCD() {
 }
 
 //====================================================
-// KIRIM DATA KE SERVER (HTTPS)
+// KIRIM DATA KE SERVER (HTTPS - Anti-Freeze & Anti-Stuck)
 //====================================================
 void kirimDataKeServer() {
   if (WiFi.status() != WL_CONNECTED) {
@@ -150,11 +150,17 @@ void kirimDataKeServer() {
 
   WiFiClientSecure client;
   client.setInsecure(); // Bypass validasi sertifikat SSL/HTTPS
+  client.setTimeout(5000); // Socket timeout 5 detik
 
   HTTPClient http;
-  
-  // Gunakan objek client untuk koneksi HTTPS
-  http.begin(client, SERVER_URL);
+  http.setTimeout(5000); // Timeout HTTPClient 5 detik agar ESP32 tidak freeze selamanya
+
+  if (!http.begin(client, SERVER_URL)) {
+    Serial.println("Gagal menginisialisasi koneksi HTTPClient.");
+    client.stop();
+    return;
+  }
+
   http.addHeader("Content-Type", "application/json");
 
   String payload = "{";
@@ -178,6 +184,7 @@ void kirimDataKeServer() {
   }
 
   http.end();
+  client.stop(); // Bebaskan RAM/SSL heap agar ESP32 tidak hang/stuck
 }
 
 //====================================================
@@ -216,13 +223,14 @@ void aksiMulaiUkurPerut() {
 void aksiKirimData() {
   Serial.println(">>> KIRIM DATA KE WEB <<<");
 
-  // Pastikan membaca nilai tinggi & berat paling baru secara instant sebelum dikirim
+  // Membaca nilai tinggi & berat paling baru secara instant sebelum dikirim
   jarakSensor = bacaTinggi();
   tinggi_cm = TINGGI_SENSOR_DARI_LANTAI - jarakSensor;
   if (tinggi_cm < 0) tinggi_cm = 0;
 
   kirimDataKeServer();
   
+  delay(50); // Jeda singkat agar alokasi HTTPS selesai sempurna sebelum membunyikan DFPlayer
   myDFPlayer.playMp3Folder(4);
 }
 
