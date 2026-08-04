@@ -62,7 +62,18 @@ $daftar_anak = $koneksi->query('SELECT id, nama, nis, tanggal_lahir FROM data_an
         &mdash; Status Gizi: <span class="tag tag-<?= strtolower(str_replace(' ', '-', $hasil['status_gizi'])) ?>"><?= $hasil['status_gizi'] ?></span>
       </div>
     <?php endif; ?>
-    <p id="status-alat" style="font-size:13px; color:#6b7a86;">Menghubungkan ke alat...</p>
+    <!-- Control Switcher Mode Input -->
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; padding:12px 16px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; flex-wrap:wrap; gap:12px;">
+      <div>
+        <label style="font-weight:600; font-size:13px; color:#334155; display:block; margin-bottom:6px;">Mode Input Data:</label>
+        <div style="display:flex; gap:8px;">
+          <button type="button" id="btn-mode-auto" onclick="setModeInput('auto')" class="btn" style="padding:7px 14px; font-size:13px; background:#2f7d5b; transition:all 0.2s;">● Auto (Sensor ESP32)</button>
+          <button type="button" id="btn-mode-manual" onclick="setModeInput('manual')" class="btn btn-secondary" style="padding:7px 14px; font-size:13px; transition:all 0.2s;">✍ Manual (Ketik)</button>
+        </div>
+      </div>
+      <div id="status-alat" style="font-size:13px; color:#6b7a86;">Menghubungkan ke alat...</div>
+    </div>
+
     <form method="post">
       <div class="form-row">
         <div>
@@ -80,22 +91,22 @@ $daftar_anak = $koneksi->query('SELECT id, nama, nis, tanggal_lahir FROM data_an
         </div>
         <div>
           <label>Berat Badan (kg)</label>
-          <input type="number" step="0.01" name="berat_badan" id="berat_badan" required>
+          <input type="number" step="0.01" name="berat_badan" id="berat_badan" required placeholder="Contoh: 20.5">
         </div>
         <div>
           <label>Tinggi Badan (cm)</label>
-          <input type="number" step="0.1" name="tinggi_badan" id="tinggi_badan" required>
+          <input type="number" step="0.1" name="tinggi_badan" id="tinggi_badan" required placeholder="Contoh: 115.0">
         </div>
         <div>
           <label>Lingkar Perut (cm)</label>
-          <input type="number" step="0.1" name="lingkar_perut" id="lingkar_perut" required>
+          <input type="number" step="0.1" name="lingkar_perut" id="lingkar_perut" required placeholder="Contoh: 50.0">
         </div>
       </div>
 
       <!-- Live Preview Hasil Real-time -->
       <div id="box-preview-hasil" style="display:none; margin: 12px 0 18px; padding:12px 16px; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
         <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
-          <span style="font-size:13px; color:#166534; font-weight:700;">● HASIL KETIK / SENSOR (REAL-TIME):</span>
+          <span style="font-size:13px; color:#166534; font-weight:700;">● HASIL PREVIEW (REAL-TIME):</span>
           <span style="font-size:14px; color:#0f172a; font-weight:600;">BMI: <strong id="preview-bmi-val" style="color:#2f7d5b;">-</strong></span>
           <span style="font-size:14px; color:#0f172a; font-weight:600;">Status Gizi: <span id="preview-status-tag" class="tag tag-normal">-</span></span>
         </div>
@@ -106,10 +117,34 @@ $daftar_anak = $koneksi->query('SELECT id, nama, nis, tanggal_lahir FROM data_an
   </div>
 </div>
 <script>
+let modeInput = 'auto'; // default mode auto (ESP32)
+
 const fields = ['berat_badan', 'tinggi_badan', 'lingkar_perut'];
 const beratEl = document.getElementById('berat_badan');
 const tinggiEl = document.getElementById('tinggi_badan');
 const selectAnakEl = document.querySelector('select[name="anak_id"]');
+
+function setModeInput(mode) {
+    modeInput = mode;
+    const btnAuto = document.getElementById('btn-mode-auto');
+    const btnManual = document.getElementById('btn-mode-manual');
+    const statusEl = document.getElementById('status-alat');
+    
+    if (mode === 'auto') {
+        btnAuto.className = 'btn';
+        btnAuto.style.background = '#2f7d5b';
+        btnManual.className = 'btn btn-secondary';
+        btnManual.style.background = '#6b7a86';
+        statusEl.innerHTML = '<span style="color:#10b981; font-weight:600;">● Mode Auto Aktif</span> — Mengambil data dari sensor ESP32...';
+        ambilBacaanAlat();
+    } else {
+        btnManual.className = 'btn';
+        btnManual.style.background = '#0284c7';
+        btnAuto.className = 'btn btn-secondary';
+        btnAuto.style.background = '#6b7a86';
+        statusEl.innerHTML = '<span style="color:#0284c7; font-weight:600;">✍ Mode Manual Aktif</span> — Otomatisasi sensor dimatikan, silakan ketik manual.';
+    }
+}
 
 function hitungUsia(tglLahirStr) {
     if (!tglLahirStr) return null;
@@ -182,9 +217,12 @@ function updatePreviewKalkulasi() {
 });
 
 function ambilBacaanAlat() {
+    if (modeInput !== 'auto') return;
+
     fetch('baca_sensor.php?_t=' + Date.now(), { cache: 'no-store' })
         .then(r => r.json())
         .then(data => {
+            if (modeInput !== 'auto') return;
             fields.forEach(f => {
                 const el = document.getElementById(f);
                 if (el && document.activeElement !== el) {
@@ -196,13 +234,15 @@ function ambilBacaanAlat() {
             const detik = data.detik_lalu !== undefined ? data.detik_lalu : 9999;
             
             if (detik <= 15) {
-                status.innerHTML = '<span style="color:#10b981; font-weight:600;">● Alat Terhubung (Real-time)</span> — Data diperbarui dari ESP32 (terakhir ' + detik + ' dtk lalu)';
+                status.innerHTML = '<span style="color:#10b981; font-weight:600;">● Alat Terhubung (Auto)</span> — Data diperbarui dari ESP32 (terakhir ' + detik + ' dtk lalu)';
             } else {
-                status.innerHTML = '<span style="color:#f59e0b; font-weight:600;">○ Alat Siaga</span> — Menunggu data dikirim dari tombol ESP32...';
+                status.innerHTML = '<span style="color:#f59e0b; font-weight:600;">○ Alat Siaga (Auto)</span> — Menunggu data dikirim dari tombol ESP32...';
             }
         })
         .catch(() => {
-            document.getElementById('status-alat').innerHTML = '<span style="color:#ef4444;">✕ Gagal terhubung ke server.</span>';
+            if (modeInput === 'auto') {
+                document.getElementById('status-alat').innerHTML = '<span style="color:#ef4444;">✕ Gagal terhubung ke server.</span>';
+            }
         });
 }
 
