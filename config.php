@@ -21,22 +21,37 @@ function hitung_usia($tanggal_lahir) {
 }
 
 function hitung_status_gizi($usia, $bmi) {
-    $ambang = [
-        6  => [17.0, 18.5],
-        7  => [17.5, 19.0],
-        8  => [18.0, 19.5],
-        9  => [18.5, 20.5],
-        10 => [19.0, 21.5],
-        11 => [19.5, 22.5],
-        12 => [20.5, 24.0],
-    ];
-    if ($usia < 6) $usia = 6;
-    if ($usia > 12) $usia = 12;
-    [$batas_normal, $batas_gemuk] = $ambang[$usia];
+    // Penentuan Status Gizi berbasis Indeks BMI (Body Mass Index / IMT)
+    // Jika usia anak berada di rentang 6-12 tahun:
+    if ($usia !== null && $usia >= 6 && $usia <= 12) {
+        $ambang_anak = [
+            6  => ['kurus' => 14.0, 'normal' => 17.0, 'gemuk' => 18.5],
+            7  => ['kurus' => 14.0, 'normal' => 17.5, 'gemuk' => 19.0],
+            8  => ['kurus' => 14.5, 'normal' => 18.0, 'gemuk' => 19.5],
+            9  => ['kurus' => 14.5, 'normal' => 18.5, 'gemuk' => 20.5],
+            10 => ['kurus' => 15.0, 'normal' => 19.0, 'gemuk' => 21.5],
+            11 => ['kurus' => 15.5, 'normal' => 19.5, 'gemuk' => 22.5],
+            12 => ['kurus' => 16.0, 'normal' => 20.5, 'gemuk' => 24.0],
+        ];
+        $t = $ambang_anak[(int)$usia];
+        if ($bmi < $t['kurus'])    return 'Kurus';
+        if ($bmi <= $t['normal'])  return 'Normal';
+        if ($bmi <= $t['gemuk'])   return 'Gemuk';
+        return 'Obesitas';
+    }
 
-    if ($bmi <= $batas_normal) return 'Normal';
-    if ($bmi <= $batas_gemuk) return 'Gemuk';
-    return 'Obesitas';
+    // Klasifikasi standar Indeks BMI / IMT (Kemenkes RI / WHO)
+    if ($bmi < 17.0) {
+        return 'Sangat Kurus';
+    } elseif ($bmi < 18.5) {
+        return 'Kurus';
+    } elseif ($bmi <= 25.0) {
+        return 'Normal';
+    } elseif ($bmi <= 27.0) {
+        return 'Gemuk';
+    } else {
+        return 'Obesitas';
+    }
 }
 
 function wajib_login() {

@@ -147,6 +147,8 @@ th { color: #6b7a86; font-weight: 600; font-size: 13px; }
     font-weight: 600;
 }
 .tag-normal { background: #eaf6ee; color: #256349; }
+.tag-kurus { background: #e0f2fe; color: #0369a1; }
+.tag-sangat-kurus { background: #e0e7ff; color: #3730a3; }
 .tag-gemuk { background: #fff4e0; color: #a06a00; }
 .tag-obesitas { background: #fdecec; color: #a33; }
 .form-row {

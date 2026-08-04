@@ -17,8 +17,8 @@ const int LCD_SCL = 22;
 LiquidCrystal_I2C lcd(LCD_ADDR, 20, 4);
 
 // ---------------- WIFI & SERVER ----------------
-const char* WIFI_SSID     = "PERTAMINA123_plus";
-const char* WIFI_PASSWORD = "Bismillah";
+const char* WIFI_SSID     = "ade";
+const char* WIFI_PASSWORD = "12345678";
 
 // Ganti URL ini sesuai dengan routing API di servermu (contoh: /api/sensor jika pakai controller khusus)
 const char* SERVER_URL = "https://seanta.my.id/api_sensor.php";
@@ -64,7 +64,7 @@ float jarakSensor = 0;
 float tinggiSebelumnya = 0;  
 bool tinggiSudahValid = false;
 
-const float TINGGI_SENSOR_DARI_LANTAI = 193; 
+const float TINGGI_SENSOR_DARI_LANTAI = 179; 
 const float TINGGI_JARAK_MIN = 20; 
 const float TINGGI_JARAK_MAX = TINGGI_SENSOR_DARI_LANTAI + 10; 
 const float TINGGI_LONCATAN_MAX = 30; 

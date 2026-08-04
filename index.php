@@ -4,6 +4,8 @@ wajib_login();
 
 $total_anak = $koneksi->query('SELECT COUNT(*) c FROM data_anak')->fetch_assoc()['c'];
 $total_pengukuran = $koneksi->query('SELECT COUNT(*) c FROM pengukuran')->fetch_assoc()['c'];
+$total_normal = $koneksi->query("SELECT COUNT(*) c FROM pengukuran WHERE status_gizi = 'Normal'")->fetch_assoc()['c'];
+$total_kurus = $koneksi->query("SELECT COUNT(*) c FROM pengukuran WHERE status_gizi LIKE '%Kurus%'")->fetch_assoc()['c'];
 $total_gemuk = $koneksi->query("SELECT COUNT(*) c FROM pengukuran WHERE status_gizi = 'Gemuk'")->fetch_assoc()['c'];
 $total_obesitas = $koneksi->query("SELECT COUNT(*) c FROM pengukuran WHERE status_gizi = 'Obesitas'")->fetch_assoc()['c'];
 
@@ -28,6 +30,8 @@ $terbaru = $koneksi->query('
   <div class="cards-row">
     <div class="stat-card"><div class="num"><?= $total_anak ?></div><div class="label">Total Anak</div></div>
     <div class="stat-card"><div class="num"><?= $total_pengukuran ?></div><div class="label">Total Pengukuran</div></div>
+    <div class="stat-card"><div class="num"><?= $total_normal ?></div><div class="label">Status Normal</div></div>
+    <div class="stat-card"><div class="num"><?= $total_kurus ?></div><div class="label">Status Kurus</div></div>
     <div class="stat-card"><div class="num"><?= $total_gemuk ?></div><div class="label">Status Gemuk</div></div>
     <div class="stat-card"><div class="num"><?= $total_obesitas ?></div><div class="label">Status Obesitas</div></div>
   </div>
